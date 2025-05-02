@@ -131,5 +131,42 @@ class WeatherAPITestCase(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 400)
 
+
+
+    def test_search_by_conditions(self):
+        """Test searching weather data by conditions"""
+        # Ensure we have some data with "sunny" conditions
+        post_data = {
+            'location': 'miami',
+            'temperature': 30,
+            'conditions': 'Sunny',
+            'humidity': 75
+        }
+        self.client.post(
+            '/api/v1/weather',
+            data=json.dumps(post_data),
+            content_type='application/json'
+        )
+
+        # Search for locations with sunny conditions
+        response = self.client.get('/api/v1/weather/search?conditions=sunny')
+        self.assertEqual(response.status_code, 200)
+
+        data = json.loads(response.data)
+        self.assertTrue(len(data) > 0)
+
+        # Verify all results contain "sunny" (case-insensitive)
+        for location, weather in data.items():
+            self.assertIn('sunny', weather['conditions'].lower())
+
+
+    def test_search_invalid_temperature(self):
+        """Test error handling for invalid temperature inputs"""
+        response = self.client.get('/api/v1/weather/search?min_temp=invalid')
+        self.assertEqual(response.status_code, 400)
+
+        data = json.loads(response.data)
+        self.assertIn('error', data)
+
 if __name__ == '__main__':
     unittest.main()

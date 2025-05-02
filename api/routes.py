@@ -128,3 +128,48 @@ def delete_weather(location):
 
     return '', 204
 
+
+
+
+
+@api_bp.route('/weather/search', methods=['GET'])
+def search_weather():
+    """Search weather data by conditions or temperature ranges"""
+    conditions = request.args.get('conditions')
+    min_temp = request.args.get('min_temp')
+    max_temp = request.args.get('max_temp')
+
+    # Validate temperature inputs
+    if min_temp:
+        try:
+            min_temp = float(min_temp)
+        except ValueError:
+            return jsonify({'error': 'min_temp must be a number'}), 400
+
+    if max_temp:
+        try:
+            max_temp = float(max_temp)
+        except ValueError:
+            return jsonify({'error': 'max_temp must be a number'}), 400
+
+    results = {}
+
+    for location, data in weather_data.items():
+        # Filter by conditions
+        if conditions and conditions.lower() not in data['conditions'].lower():
+            continue
+
+        # Filter by minimum temperature
+        if min_temp and data['temperature'] < float(min_temp):
+            continue
+
+        # Filter by maximum temperature
+        if max_temp and data['temperature'] > float(max_temp):
+            continue
+
+        # Add to results if it passed all filters
+        results[location] = data
+
+    return jsonify(results)
+
+
