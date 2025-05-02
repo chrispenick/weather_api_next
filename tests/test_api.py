@@ -168,5 +168,42 @@ class WeatherAPITestCase(unittest.TestCase):
         data = json.loads(response.data)
         self.assertIn('error', data)
 
+
+
+    def test_weather_statistics(self):
+        """Test the weather statistics endpoint"""
+        # Create a few weather data points
+        locations = [
+            ('city1', 10, 60),
+            ('city2', 20, 70),
+            ('city3', 30, 80)
+        ]
+
+        for location, temp, humidity in locations:
+            post_data = {
+                'location': location,
+                'temperature': temp,
+                'conditions': 'Clear',
+                'humidity': humidity
+            }
+            self.client.post(
+                '/api/v1/weather',
+                data=json.dumps(post_data),
+                content_type='application/json'
+            )
+
+        # Request statistics
+        response = self.client.get('/api/v1/weather/stats')
+        self.assertEqual(response.status_code, 200)
+
+        data = json.loads(response.data)
+        self.assertEqual(data['count'], 3)  # Our 3 test cities
+        self.assertEqual(data['avg_temperature'], 20.0)  # (10 + 20 + 30) / 3
+        self.assertEqual(data['min_temperature'], 10.0)
+        self.assertEqual(data['max_temperature'], 30.0)
+        self.assertEqual(data['avg_humidity'], 70.0)  # (60 + 70 + 80) / 3
+
+
+
 if __name__ == '__main__':
     unittest.main()

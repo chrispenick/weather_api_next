@@ -173,3 +173,30 @@ def search_weather():
     return jsonify(results)
 
 
+
+@api_bp.route('/weather/stats', methods=['GET'])
+def get_weather_stats():
+    """Get statistics about weather data"""
+    if not weather_data:
+        return jsonify({
+            'count': 0,
+            'avg_temperature': None,
+            'min_temperature': None,
+            'max_temperature': None,
+            'avg_humidity': None
+        })
+
+    temperatures = [data['temperature'] for data in weather_data.values()]
+    humidities = [data['humidity'] for data in weather_data.values()]
+
+    stats = {
+        'count': len(weather_data),
+        'avg_temperature': sum(temperatures) / len(temperatures),
+        'min_temperature': min(temperatures),
+        'max_temperature': max(temperatures),
+        'avg_humidity': sum(humidities) / len(humidities)
+    }
+
+    return jsonify(stats)
+
+
