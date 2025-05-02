@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=64", "wheel"]
+requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "weather_api_next"
-version = "0.3.0"
+version = "0.1.0"
 description = "A sample weather API project"
 authors = [
     { name = "Chris Penick", email = "chris@chrispenick.com" }
@@ -13,11 +13,8 @@ dependencies = [
     "flask==2.0.1",
     "pytest==6.2.5",
     "gunicorn==20.1.0",
-    "werkzeug==2.0.1",
-    "pytest-cov==3.0.0",
-    "pytest-mock==3.7.0",
-    "responses==0.13.4"
+    "werkzeug==2.0.1"
 ]
 
-[tool.setuptools]
-packages = ["api","tests"]
+[tool.setuptools.packages.find]
+where = ["."]
