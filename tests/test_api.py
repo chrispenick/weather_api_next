@@ -205,5 +205,31 @@ class WeatherAPITestCase(unittest.TestCase):
 
 
 
+    def test_weather_statistics_empty(self):
+        """Test statistics with no weather data"""
+        # Clear all weather data (requires modifying the global variable)
+        with self.app.app_context():
+            from weather_api_next.api.routes import weather_data as global_weather_data
+            # Save existing data
+            saved_data = dict(global_weather_data)
+            # Clear the dictionary
+            global_weather_data.clear()
+
+            # Request statistics for empty data
+            response = self.client.get('/api/v1/weather/stats')
+            self.assertEqual(response.status_code, 200)
+
+            data = json.loads(response.data)
+            self.assertEqual(data['count'], 0)
+            self.assertIsNone(data['avg_temperature'])
+            self.assertIsNone(data['min_temperature'])
+            self.assertIsNone(data['max_temperature'])
+            self.assertIsNone(data['avg_humidity'])
+
+            # Restore the data
+            global_weather_data.update(saved_data)
+
+
+
 if __name__ == '__main__':
     unittest.main()
