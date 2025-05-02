@@ -160,6 +160,13 @@ class WeatherAPITestCase(unittest.TestCase):
             self.assertIn('sunny', weather['conditions'].lower())
 
 
+    def test_search_invalid_temperature(self):
+        """Test error handling for invalid temperature inputs"""
+        response = self.client.get('/api/v1/weather/search?min_temp=invalid')
+        self.assertEqual(response.status_code, 400)
+
+        data = json.loads(response.data)
+        self.assertIn('error', data)
 
 if __name__ == '__main__':
     unittest.main()
