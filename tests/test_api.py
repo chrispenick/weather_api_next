@@ -6,6 +6,7 @@ from weather_api_next.api.routes import weather_data  # To clear/reset in-memory
 class WeatherAPITestCase(unittest.TestCase):
     """Test case for the weather API"""
 
+    # Update the `setUp` method
     def setUp(self):
         """Set up test client and data"""
         self.app = create_app('testing')
