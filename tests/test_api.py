@@ -10,13 +10,31 @@ class WeatherAPITestCase(unittest.TestCase):
         self.app = create_app('testing')
         self.client = self.app.test_client()
 
+        # Clear the database before each test
+        
+
         # Test data
         self.test_location = 'testcity'
-        self.test_data = {
-            'temperature': 22,
-            'conditions': 'Clear',
-            'humidity': 65
-        }
+        self.test_data = [
+            {
+                'location': 'stat_city1',
+                'temperature': 10,
+                'conditions': 'Cold',
+                'humidity': 50
+            },
+            {
+                'location': 'stat_city2',
+                'temperature': 20,
+                'conditions': 'Mild',
+                'humidity': 60
+            },
+            {
+                'location': 'stat_city3',
+                'temperature': 30,
+                'conditions': 'Hot',
+                'humidity': 70
+            }
+        ]
 
     def test_health_check(self):
         """Test health check endpoint"""
