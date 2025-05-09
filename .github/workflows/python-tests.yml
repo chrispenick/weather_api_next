@@ -9,9 +9,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ..
     steps:
     - uses: actions/checkout@v3
 
@@ -28,6 +25,7 @@ jobs:
 
     - name: Run tests with coverage
       run: |
+      working-directory: ..
         pytest --cov=weather_api_next --cov-report=xml
 
     - name: Upload coverage to Codecov
