@@ -5,36 +5,19 @@ from weather_api_next import create_app
 class WeatherAPITestCase(unittest.TestCase):
     """Test case for the weather API"""
 
+    # Update the `setUp` method
     def setUp(self):
         """Set up test client and data"""
         self.app = create_app('testing')
         self.client = self.app.test_client()
 
-        # Clear the database before each test
-        
-
         # Test data
         self.test_location = 'testcity'
-        self.test_data = [
-            {
-                'location': 'stat_city1',
-                'temperature': 10,
-                'conditions': 'Cold',
-                'humidity': 50
-            },
-            {
-                'location': 'stat_city2',
-                'temperature': 20,
-                'conditions': 'Mild',
-                'humidity': 60
-            },
-            {
-                'location': 'stat_city3',
-                'temperature': 30,
-                'conditions': 'Hot',
-                'humidity': 70
-            }
-        ]
+        self.test_data = {
+            'temperature': 25,
+            'conditions': 'Sunny',
+            'humidity': 65
+        }
 
     def test_health_check(self):
         """Test health check endpoint"""
@@ -44,12 +27,30 @@ class WeatherAPITestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['status'], 'healthy')
 
-    def test_get_all_weather(self):
+    def test_get_all_weather(self, client):
         """Test getting all weather data"""
-        response = self.client.get('/api/v1/weather')
+        # Add default weather data
+        default_data = [
+            {'location': 'london', 'temperature': 15, 'conditions': 'Cloudy', 'humidity': 80},
+            {'location': 'new_york', 'temperature': 20, 'conditions': 'Sunny', 'humidity': 60},
+            {'location': 'tokyo', 'temperature': 25, 'conditions': 'Rainy', 'humidity': 70}
+        ]
+        for data in default_data:
+            client.post(
+                '/api/v1/weather',
+                data=json.dumps(data),
+                content_type='application/json'
+            )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(isinstance(json.loads(response.data), dict))
+        # Test the endpoint
+        response = client.get('/api/v1/weather')
+        assert response.status_code == 200
+
+        # Verify the response contains the default locations
+        data = json.loads(response.data)
+        assert 'london' in data
+        assert 'new_york' in data
+        assert 'tokyo' in data
 
     def test_create_and_get_weather(self):
         """Test creating and then getting weather data"""
@@ -188,8 +189,14 @@ class WeatherAPITestCase(unittest.TestCase):
 
 
 
+    # Update `test_weather_statistics`
     def test_weather_statistics(self):
         """Test the weather statistics endpoint"""
+        # Clear all weather data
+        with self.app.app_context():
+            from weather_api_next.api.routes import weather_data
+            weather_data.clear()
+
         # Create a few weather data points
         locations = [
             ('city1', 10, 60),
@@ -220,7 +227,6 @@ class WeatherAPITestCase(unittest.TestCase):
         self.assertEqual(data['min_temperature'], 10.0)
         self.assertEqual(data['max_temperature'], 30.0)
         self.assertEqual(data['avg_humidity'], 70.0)  # (60 + 70 + 80) / 3
-
 
 
     def test_weather_statistics_empty(self):

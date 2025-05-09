@@ -1,5 +1,3 @@
-
-
 """Unit tests for validation functions"""
 import pytest
 from weather_api_next.api.routes import validate_location_name, validate_weather_data

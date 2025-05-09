@@ -38,13 +38,27 @@ class TestAPIRoutes:
 
     def test_get_specific_location(self, client):
         """Test getting a specific location's weather"""
+        # Add the location
+        post_data = {
+            'location': 'london',
+            'temperature': 15,
+            'conditions': 'Cloudy',
+            'humidity': 80
+        }
+        client.post(
+            '/api/v1/weather',
+            data=json.dumps(post_data),
+            content_type='application/json'
+        )
+
+        # Test the endpoint
         response = client.get('/api/v1/weather/london')
         assert response.status_code == 200
 
         data = json.loads(response.data)
-        assert 'temperature' in data
-        assert 'conditions' in data
-        assert 'humidity' in data
+        assert data['temperature'] == 15
+        assert data['conditions'] == 'Cloudy'
+        assert data['humidity'] == 80
 
     def test_get_nonexistent_location(self, client):
         """Test getting a non-existent location"""
@@ -54,6 +68,7 @@ class TestAPIRoutes:
         data = json.loads(response.data)
         assert 'error' in data
 
+    # Update `test_create_weather`
     def test_create_weather(self, client):
         """Test creating weather data for a new location"""
         post_data = {
@@ -69,7 +84,7 @@ class TestAPIRoutes:
             content_type='application/json'
         )
 
-        assert response.status_code == 409
+        assert response.status_code == 201  # Expect 201 for successful creation
         data = json.loads(response.data)
         assert data['temperature'] == 22
         assert data['conditions'] == 'Clear'
@@ -78,8 +93,13 @@ class TestAPIRoutes:
         # Clean up - delete the test location
         client.delete('/api/v1/weather/testcity')
 
+    # Update `test_create_invalid_weather`
     def test_create_invalid_weather(self, client):
         """Test creating weather with invalid data"""
+        # Clear all weather data
+        from weather_api_next.api.routes import weather_data
+        weather_data.clear()
+
         # Missing required field
         post_data = {
             'location': 'testcity',
@@ -94,7 +114,7 @@ class TestAPIRoutes:
             content_type='application/json'
         )
 
-        assert response.status_code == 409
+        assert response.status_code == 400  # Expect 400 for invalid data
         data = json.loads(response.data)
         assert 'error' in data
         assert 'conditions' in data['error']
@@ -220,29 +240,12 @@ class TestAPIRoutes:
 
     def test_weather_stats(self, client):
         """Test the weather statistics endpoint"""
-        # Create cities with specific temperatures for predictable stats
-        test_data = [
-            {
-                'location': 'stat_city1',
-                'temperature': 10,
-                'conditions': 'Cold',
-                'humidity': 50
-            },
-            {
-                'location': 'stat_city2',
-                'temperature': 20,
-                'conditions': 'Mild',
-                'humidity': 60
-            },
-            {
-                'location': 'stat_city3',
-                'temperature': 30,
-                'conditions': 'Hot',
-                'humidity': 70
-            }
-        ]
-
         # Add test data
+        test_data = [
+            {'location': 'stat_city1', 'temperature': 10, 'conditions': 'Cold', 'humidity': 50},
+            {'location': 'stat_city2', 'temperature': 20, 'conditions': 'Mild', 'humidity': 60},
+            {'location': 'stat_city3', 'temperature': 30, 'conditions': 'Hot', 'humidity': 70}
+        ]
         for data in test_data:
             client.post(
                 '/api/v1/weather',
@@ -250,19 +253,13 @@ class TestAPIRoutes:
                 content_type='application/json'
             )
 
-        # Get statistics
+        # Test the statistics endpoint
         response = client.get('/api/v1/weather/stats')
         assert response.status_code == 200
 
         data = json.loads(response.data)
-
-        # Since there may be other cities in the data, we can't assert exact values
-        # But we can check that our test cities are included in the stats
-        assert data['count'] >= 3
-        assert data['min_temperature'] <= 10
-        assert data['max_temperature'] >= 30
-
-        # Clean up
-        for city in ['stat_city1', 'stat_city2', 'stat_city3']:
-            client.delete(f'/api/v1/weather/{city}')
-
+        assert data['count'] >= 3  # Ensure at least 3 cities are included
+        assert data['avg_temperature'] == 20.0  # (10 + 20 + 30) / 3
+        assert data['min_temperature'] == 10.0
+        assert data['max_temperature'] == 30.0
+        assert data['avg_humidity'] == 60.0  # (50 + 60 + 70) / 3
