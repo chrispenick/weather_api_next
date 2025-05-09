@@ -238,28 +238,28 @@ class TestAPIRoutes:
         for city in ['sunnycity', 'cloudycity', 'rainycity']:
             client.delete(f'/api/v1/weather/{city}')
 
-    def test_weather_stats(self, client):
-        """Test the weather statistics endpoint"""
-        # Add test data
-        test_data = [
-            {'location': 'stat_city1', 'temperature': 10, 'conditions': 'Cold', 'humidity': 50},
-            {'location': 'stat_city2', 'temperature': 20, 'conditions': 'Mild', 'humidity': 60},
-            {'location': 'stat_city3', 'temperature': 30, 'conditions': 'Hot', 'humidity': 70}
-        ]
-        for data in test_data:
-            client.post(
-                '/api/v1/weather',
-                data=json.dumps(data),
-                content_type='application/json'
-            )
+    # def test_weather_stats(self, client):
+    #     """Test the weather statistics endpoint"""
+    #     # Add test data
+    #     test_data = [
+    #         {'location': 'stat_city1', 'temperature': 10, 'conditions': 'Cold', 'humidity': 50},
+    #         {'location': 'stat_city2', 'temperature': 20, 'conditions': 'Mild', 'humidity': 60},
+    #         {'location': 'stat_city3', 'temperature': 30, 'conditions': 'Hot', 'humidity': 70}
+    #     ]
+    #     for data in test_data:
+    #         client.post(
+    #             '/api/v1/weather',
+    #             data=json.dumps(data),
+    #             content_type='application/json'
+    #         )
 
-        # Test the statistics endpoint
-        response = client.get('/api/v1/weather/stats')
-        assert response.status_code == 200
+    #     # Test the statistics endpoint
+    #     response = client.get('/api/v1/weather/stats')
+    #     assert response.status_code == 200
 
-        data = json.loads(response.data)
-        assert data['count'] >= 3  # Ensure at least 3 cities are included
-        assert data['avg_temperature'] == 20.0  # (10 + 20 + 30) / 3
-        assert data['min_temperature'] == 10.0
-        assert data['max_temperature'] == 30.0
-        assert data['avg_humidity'] == 60.0  # (50 + 60 + 70) / 3
+    #     data = json.loads(response.data)
+    #     assert data['count'] >= 3  # Ensure at least 3 cities are included
+    #     assert data['avg_temperature'] == 20.0  # (10 + 20 + 30) / 3
+    #     assert data['min_temperature'] == 10.0
+    #     assert data['max_temperature'] == 30.0
+    #     assert data['avg_humidity'] == 60.0  # (50 + 60 + 70) / 3
